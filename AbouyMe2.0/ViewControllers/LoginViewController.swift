@@ -12,12 +12,19 @@ final class LoginViewController: UIViewController {
     @IBOutlet var userNameTextField: UITextField!
     @IBOutlet var passwordTextField: UITextField!
     
-    private let user = "User"
-    private let password = "Password"
-    
+    let user = User.getUser()
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let welcomeVC = segue.destination as? WelcomeViewController
-        welcomeVC?.userName = user
+        let tabBarVC = segue.destination as? UITabBarController
+        
+        tabBarVC?.viewControllers?.forEach{ viewController in
+            if let welcomeVC = viewController as? WelcomeViewController {
+                welcomeVC.user = user
+            } else if let navigationVC = viewController as? UINavigationController {
+                let personVC = navigationVC.topViewController as? PersonViewController
+                personVC?.user = user
+            }
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -26,7 +33,7 @@ final class LoginViewController: UIViewController {
     }
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        guard userNameTextField.text == user, passwordTextField.text == password else {
+        guard userNameTextField.text == user.userName, passwordTextField.text == user.password else {
             showAlert(
                 withTitle: "Wrong User Name or Password",
                 andMessage: "Try again"
@@ -38,8 +45,8 @@ final class LoginViewController: UIViewController {
     
     @IBAction func forgotRegisterData(_ sender: UIButton) {
         sender.tag == 1
-        ? showAlert(withTitle: "Wrong password", andMessage: "Your password is \(password)")
-        : showAlert(withTitle: "Wrong User Name", andMessage: "Your user name is \(user)")
+        ? showAlert(withTitle: "Wrong password", andMessage: "Your password is \(user.password)")
+        : showAlert(withTitle: "Wrong User Name", andMessage: "Your user name is \(user.userName)")
     }
     
     @IBAction func unwind(for segue: UIStoryboardSegue){
